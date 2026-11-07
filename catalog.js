@@ -28,7 +28,7 @@ function liftSheet(sheet){
 function arcLayout(width,height){
  const compact=width<=650;
  const unit=Math.min(width/(compact?510:864),height/(compact?640:486));
- return {compact,unit,radius:(compact?490:495)*unit,centerY:(compact?431:531)*unit};
+ return {compact,unit,radius:(compact?510:515)*unit,centerY:(compact?451:551)*unit};
 }
 function render(p,arrival=1){
  progress=p;
@@ -49,7 +49,7 @@ function render(p,arrival=1){
  if(visible&&image.dataset.src){
    image.src=image.dataset.src;
    delete image.dataset.src;
- }button.style.visibility=visible?'visible':'hidden';button.setAttribute('aria-hidden',String(!visible));if(!root.hasAttribute('aria-busy'))button.style.opacity='1';button.tabIndex=visible?0:-1;button.style.zIndex=deck?String(50-order):String(20+Math.round(Math.cos(theta)*10));button.style.borderRadius=(deck?1:compact?18:3)+'px';button.style.setProperty('--edge',String(deck));button.classList.toggle('front',order===0&&deck===1);
+ }button.style.visibility=visible?'visible':'hidden';button.setAttribute('aria-hidden',String(!visible));if(!root.hasAttribute('aria-busy'))button.style.opacity='1';button.tabIndex=visible?0:-1;button.style.zIndex=deck?String(50-order):String(20+Math.round(Math.cos(theta)*10));button.style.borderRadius=(deck?1:0)+'px';button.style.setProperty('--edge',String(deck));button.classList.toggle('front',order===0&&deck===1);
  });
  document.querySelector('.catalog-track i').style.height=(10+progress*90)+'%';
  const stage=viewer.open?'photos':deck?'folder':'albums';
