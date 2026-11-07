@@ -1,6 +1,9 @@
 (()=>{
 const albums=window.GARUST_ALBUMS;
-const asset=src=>/^https?:/.test(src)?src:'assets/'+src;let categoryFilter='Все работы';const indices=()=>albums.map((a,i)=>i).filter(i=>categoryFilter==='Все работы'||albums[i].type===categoryFilter);
+const asset=src=>/^https?:/.test(src)?src:'assets/'+src;const categories=[...new Set(albums.map(album=>album.type))];
+let categoryFilter=categories[0];
+const indices=()=>albums.map((a,i)=>i).filter(i=>albums[i].type===categoryFilter);
+const mobileCatalog=matchMedia('(max-width:650px)');
 const root=document.querySelector('#albumScene'),caption=document.querySelector('#openAlbum'),category=document.querySelector('#albumCategory'),viewer=document.querySelector('#albumViewer');let progress=0,selected=0,photo=0,rotation=0,drag=null,opening=false,mode='albums',entering=false;
 const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)),lerp=(a,b,t)=>a+(b-a)*t,ease=x=>{x=clamp(x);return x*x*(3-2*x)},cards=[];
 let liftedSheet=null;
@@ -99,6 +102,7 @@ async function closePhoto(){
    viewer.close();
    render(progress);
  }finally{opening=false}
+ if(mobileCatalog.matches)await backToAlbums();
 }
 async function revealAlbumSheets(){
  const sheets=cards.filter(card=>card.style.visibility==='visible');
@@ -151,10 +155,11 @@ async function revealAlbumSheets(){
    }
  }
 }
-function enterAlbum(index){
+async function enterAlbum(index){
  if(entering||opening)return;
  if(!albums[index].photos.length){window.open(albums[index].source,'_blank','noopener');return}
- return changeCatalog(1,()=>{selected=index;photo=0;mode='photos'},revealAlbumSheets);
+ await changeCatalog(1,()=>{selected=index;photo=0;mode='photos'},revealAlbumSheets);
+ if(mobileCatalog.matches)await open();
 }
 function showPhoto(n){const album=albums[selected];photo=(n+album.photos.length)%album.photos.length;document.querySelector('#viewerTitle').textContent=album.title;document.querySelector('#photoCount').textContent=String(photo+1).padStart(2,'0')+' / '+String(album.photos.length).padStart(2,'0');const image=document.querySelector('#viewerImage');image.src=asset(album.photos[photo]);document.querySelectorAll('.neighbor').forEach(button=>{
  const offset=Number(button.dataset.offset);
@@ -262,7 +267,6 @@ viewerStage.addEventListener('touchend',event=>{
  const touch=event.changedTouches[0],dx=touch.clientX-touchX;
  if(!opening&&Math.abs(dx)>38&&Math.abs(dx)>Math.abs(touch.clientY-touchY))showPhoto(photo+(dx<0?1:-1));
 },{passive:true});
-const categories=['Все работы',...new Set(albums.map(album=>album.type))];
 categories.forEach((type,index)=>{
  const button=document.createElement('button');
  button.type='button';

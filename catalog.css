@@ -140,3 +140,4 @@ html::-webkit-scrollbar,.album-filter::-webkit-scrollbar,.viewer-thumbs::-webkit
  #logo,#viewerLogo,#homeAlbums,#openAlbum,#viewerTitle{font-size:12px}
  .site-links a,.album-filter button,#albumCategory,.viewer-bar>button,#stepBack{font-size:11px}
 }
+@media(max-width:650px){.catalog-nav button[data-view="folder"],.viewer-steps button[data-view="folder"],#stepBack{display:none}}
