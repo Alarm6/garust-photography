@@ -21,13 +21,11 @@ video.addEventListener('playing',()=>{
 });
 addEventListener('pointerdown',()=>{if(video.paused)play()},{once:true});
 const catalogReady=8.9;
-const introKey='garust-intro-complete';
 let catalogLocked=false;
 function lockCatalog(){
   if(catalogLocked)return;
   catalogLocked=true;
   document.documentElement.classList.add('catalog-locked');
-  try{sessionStorage.setItem(introKey,'1')}catch{}
 }
 function draw(){
   pending=false;
@@ -71,13 +69,12 @@ history.scrollRestoration='manual';
 const navigationType=performance.getEntriesByType('navigation')[0]?.type;
 const reloaded=navigationType?navigationType==='reload':performance.navigation?.type===1;
 if(reloaded){
-  try{sessionStorage.removeItem(introKey)}catch{}
   history.replaceState(null,'',location.pathname+location.search);
-  scrollTo({top:0,behavior:'instant'});
+}
+if(location.hash==='#albums'){
+  lockCatalog();
 }else{
-  let introCompleted=false;
-  try{introCompleted=sessionStorage.getItem(introKey)==='1'}catch{}
-  if(introCompleted||location.hash==='#albums')lockCatalog();
+  scrollTo({top:0,behavior:'instant'});
 }
 function showCatalog(){
   lockCatalog();
@@ -90,7 +87,6 @@ logo.addEventListener('click',event=>{
 });
 document.querySelector('#homeAlbums').addEventListener('click',event=>{
   event.preventDefault();
-  history.replaceState(null,'','#albums');
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){showCatalog();return}
   const start=performance.now(),from=scrollY;
   function advance(now){
