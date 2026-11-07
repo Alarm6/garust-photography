@@ -192,7 +192,7 @@ viewerStage.addEventListener('wheel',event=>{
  const delta=Math.abs(event.deltaX)>Math.abs(event.deltaY)?event.deltaX:event.deltaY;
  wheelTotal+=delta*(event.deltaMode===1?16:event.deltaMode===2?innerHeight:1);
  if(Math.abs(wheelTotal)<36)return;
- scrollSound();
+
  showPhoto(photo+Math.sign(wheelTotal));
  wheelTotal=0;lastWheelStep=now;
 },{passive:false});
@@ -231,7 +231,6 @@ document.querySelector('#menu').addEventListener('wheel',event=>{
  const overArc=y<=0&&Math.abs(Math.hypot(x,y)-radius)<=105*unit;
  if(!overArc&&!event.target.closest('.album-card'))return;
  event.preventDefault();
- if(event.deltaY||event.deltaX)scrollSound();
  turn(-(event.deltaY+event.deltaX)*.0016);
 },{passive:false});
 root.addEventListener('pointerdown',event=>{
