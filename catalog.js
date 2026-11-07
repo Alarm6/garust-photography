@@ -111,7 +111,19 @@ async function revealAlbumSheets(){
    sheet.classList.add('sheet-pending');
    const image=sheet.querySelector('img');
    image.loading='eager';
-   return image.decode().then(()=>true,()=>false);
+   if(image.complete)return Promise.resolve(image.naturalWidth>0);
+   return new Promise(resolve=>{
+     const timeout=setTimeout(()=>finish(false),9000);
+     function finish(loaded){
+       clearTimeout(timeout);
+       image.removeEventListener('load',onLoad);
+       image.removeEventListener('error',onError);
+       resolve(loaded);
+     }
+     const onLoad=()=>finish(true),onError=()=>finish(false);
+     image.addEventListener('load',onLoad);
+     image.addEventListener('error',onError);
+   });
  });
  try{
    for(const [index,sheet] of sheets.entries()){
@@ -132,7 +144,12 @@ async function revealAlbumSheets(){
  }finally{
    root.style.translate='';
    root.removeAttribute('aria-busy');
-   for(const sheet of sheets)sheet.style.opacity='1';
+   for(const sheet of sheets){
+     sheet.style.opacity='1';
+     const image=sheet.querySelector('img');
+     if(image.naturalWidth)sheet.classList.remove('sheet-pending');
+     else image.addEventListener('load',()=>sheet.classList.remove('sheet-pending'),{once:true});
+   }
  }
 }
 function enterAlbum(index){

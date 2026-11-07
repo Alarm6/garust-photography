@@ -30,3 +30,6 @@
   background:radial-gradient(ellipse,#20202026,transparent 72%);
 }
 #menu > :not(#albumScene){opacity:var(--catalog-controls,0)}
+#person{background:url('assets/hero-fashion-pingpong.jpg') center/contain no-repeat}
+#modelVideo:not(.is-playing){visibility:hidden}
+#person:has(.is-playing){background:none}
