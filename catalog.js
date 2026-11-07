@@ -92,6 +92,7 @@ function backToAlbums(){
  return changeCatalog(-1,()=>{mode='albums';rotation=0;photo=0});
 }
 async function closePhoto(){
+ if(viewerEntrance)await viewerEntrance;
  if(opening||!viewer.open)return;
  opening=true;
  try{
@@ -168,6 +169,7 @@ function showPhoto(n){const album=albums[selected];photo=(n+album.photos.length)
  button.setAttribute('aria-label','Фотография '+(index+1));
  button.firstElementChild.src=asset(album.photos[index]);
 });if(viewer.open&&!reducedMotion())image.animate([{opacity:.55},{opacity:1}],{duration:180,easing:'ease-out'});image.alt=album.title+' — фотография '+(photo+1);const thumbs=document.querySelector('#viewerThumbs');if(thumbAlbum!==selected){thumbAlbum=selected;thumbs.replaceChildren();album.photos.forEach((src,i)=>{const b=document.createElement('button');b.className=i===photo?'selected':'';b.setAttribute('aria-label','Фотография '+(i+1));b.innerHTML='<img src="'+asset(src)+'" loading="lazy" alt="">';b.onclick=()=>showPhoto(i);thumbs.append(b)});}thumbs.querySelector('.selected')?.classList.remove('selected');const active=thumbs.children[photo];active.classList.add('selected');thumbs.scrollLeft=active.offsetLeft-(thumbs.clientWidth-active.offsetWidth)/2}
+let viewerEntrance=null;
 async function open(){
  if(opening||entering||viewer.open||mode!=='photos')return;
  showPhoto(photo);
@@ -176,11 +178,12 @@ async function open(){
  if(!reducedMotion()){
    opening=true;
    try{
-     await Promise.all([
+     viewerEntrance=Promise.all([
        viewer.animate([{opacity:0},{opacity:1}],motion).finished,
        viewerStage.animate([{transform:'translateX(27vw) scale(.94)'},{transform:'none'}],motion).finished
      ]);
-   }finally{opening=false}
+     await viewerEntrance;
+   }finally{viewerEntrance=null;opening=false}
  }
 
 }
