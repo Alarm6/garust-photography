@@ -11,9 +11,9 @@ let entries=[],lastFrame="",thumbAlbum=-1;
 const filter=document.querySelector('#albumFilter');
 function label(i){const album=albums[i];caption.textContent=mode==='photos'?`${photo+1} / ${album.photos.length}`:album.title;category.textContent=mode==='photos'?album.title:album.type+' · '+(indices().indexOf(i)+1)+' / '+indices().length}
 function build(){liftedSheet=null;lastFrame="";root.replaceChildren();cards.length=0;entries=mode==='albums'?indices().map(i=>({album:i,image:albums[i].cover||albums[i].photos[0]})):albums[selected].photos.map((image,i)=>({album:selected,image,photo:i}));
- entries.forEach((entry,i)=>{const button=document.createElement('button');button.className=mode==='photos'?'album-card photo-sheet':'album-card';button.setAttribute('aria-label',mode==='albums'?'Открыть альбом «'+albums[entry.album].title+'»':'Открыть фотографию '+(i+1)+' из альбома «'+albums[selected].title+'»');button.innerHTML='<span class="card-surface"><img data-src="'+asset(entry.image)+'" loading="lazy" alt="" draggable="false"><span class="card-edge"></span></span>';button.addEventListener('click',()=>{if(drag?.moved||opening||entering)return;if(mode==='albums')enterAlbum(entry.album,button);else{photo=entry.photo;label(selected);open(button,entry.image)}});button.addEventListener('pointerenter',()=>{if(!drag&&!opening&&!entering&&mode==='albums')label(entry.album)});button.addEventListener('pointerenter',event=>{if(event.pointerType==='mouse'&&mode==='photos'&&!entering&&!drag)liftSheet(button)});
+ entries.forEach((entry,i)=>{const button=document.createElement('button');button.className=mode==='photos'?'album-card photo-sheet':'album-card';button.setAttribute('aria-label',mode==='albums'?'Открыть альбом «'+albums[entry.album].title+'»':'Открыть фотографию '+(i+1)+' из альбома «'+albums[selected].title+'»');button.innerHTML='<span class="card-surface"><img data-src="'+asset(entry.image)+'" loading="lazy" alt="" draggable="false"><span class="card-edge"></span></span>';button.addEventListener('click',()=>{if(drag?.moved||opening||entering)return;if(mode==='albums')enterAlbum(entry.album,button);else{photo=entry.photo;label(selected);open(button,entry.image)}});button.addEventListener('pointerenter',()=>{if(!drag&&!opening&&!entering&&mode==='albums')label(entry.album)});button.addEventListener('pointerenter',event=>{if(!mobileCatalog.matches&&event.pointerType==='mouse'&&mode==='photos'&&!entering&&!drag)liftSheet(button)});
  button.addEventListener('pointerleave',()=>{label(selected);if(liftedSheet===button)liftSheet(null)});
- button.addEventListener('focus',()=>{if(mode==='photos'&&!entering&&button.matches(':focus-visible'))liftSheet(button)});
+ button.addEventListener('focus',()=>{if(!mobileCatalog.matches&&mode==='photos'&&!entering&&button.matches(':focus-visible'))liftSheet(button)});
  button.addEventListener('blur',()=>{if(liftedSheet===button)liftSheet(null)});root.append(button);cards.push(button)})
  root.setAttribute('aria-label',mode==='albums'?'Альбомы':'Фотографии альбома «'+albums[selected].title+'»');
 }
@@ -28,7 +28,7 @@ function liftSheet(sheet){
 function arcLayout(width,height){
  const compact=width<=650;
  const unit=Math.min(width/(compact?510:864),height/(compact?640:486));
- return {compact,unit,radius:(compact?365:495)*unit,centerY:(compact?306:531)*unit};
+ return {compact,unit,radius:(compact?490:495)*unit,centerY:(compact?431:531)*unit};
 }
 function render(p,arrival=1){
  progress=p;
@@ -39,8 +39,8 @@ function render(p,arrival=1){
  if(frame===lastFrame)return;
  lastFrame=frame;
  const anchor=mode==='albums'?entries.findIndex(entry=>entry.album===selected):0;
- const cardW=lerp(58,112,arrival)*unit,cardH=lerp(78,151,arrival)*unit;
- cards.forEach((button,i)=>{const raw=(i-anchor+cards.length)%cards.length,ringIndex=raw>cards.length/2?raw-cards.length:raw,theta=ringIndex*Math.PI/6+rotation,x=Math.sin(theta)*radius,y=centerY-Math.cos(theta)*radius,angle=theta*180/Math.PI,order=mode==='photos'?(i-photo+cards.length)%cards.length:0,spacing=(compact?60:lerp(56,90,spread))*unit,stackX=(compact?-34:-90)*unit+order*spacing;
+ const cardW=lerp(58,compact?218:112,arrival)*unit,cardH=lerp(78,compact?320:151,arrival)*unit;
+ cards.forEach((button,i)=>{const raw=(i-anchor+cards.length)%cards.length,ringIndex=raw>cards.length/2?raw-cards.length:raw,theta=ringIndex*Math.PI/6+rotation,x=Math.sin(theta)*radius,y=centerY-Math.cos(theta)*radius,angle=theta*(compact?.56:1)*180/Math.PI,order=mode==='photos'?(i-photo+cards.length)%cards.length:0,spacing=(compact?60:lerp(56,90,spread))*unit,stackX=(compact?-34:-90)*unit+order*spacing;
  if(deck)button.dataset.order=order;
  button.style.width=lerp(cardW,(compact?270:200)*unit,deck)+'px';button.style.height=lerp(cardH,(compact?350:270)*unit,deck)+'px';button.style.transform=`translate3d(${lerp(x,stackX,deck)}px,${lerp(y,-5*unit,deck)}px,${0}px) translate(-50%,-50%) rotateZ(${lerp(angle,0,deck)}deg) rotateY(${-34*deck}deg)`;
  const visible=deck?(compact?order<5:stackX<W/2+120*unit):
@@ -49,7 +49,7 @@ function render(p,arrival=1){
  if(visible&&image.dataset.src){
    image.src=image.dataset.src;
    delete image.dataset.src;
- }button.style.visibility=visible?'visible':'hidden';button.setAttribute('aria-hidden',String(!visible));if(!root.hasAttribute('aria-busy'))button.style.opacity='1';button.tabIndex=visible?0:-1;button.style.zIndex=deck?String(50-order):String(20+Math.round(Math.cos(theta)*10));button.style.borderRadius=(deck?1:3)+'px';button.style.setProperty('--edge',String(deck));button.classList.toggle('front',order===0&&deck===1);
+ }button.style.visibility=visible?'visible':'hidden';button.setAttribute('aria-hidden',String(!visible));if(!root.hasAttribute('aria-busy'))button.style.opacity='1';button.tabIndex=visible?0:-1;button.style.zIndex=deck?String(50-order):String(20+Math.round(Math.cos(theta)*10));button.style.borderRadius=(deck?1:compact?18:3)+'px';button.style.setProperty('--edge',String(deck));button.classList.toggle('front',order===0&&deck===1);
  });
  document.querySelector('.catalog-track i').style.height=(10+progress*90)+'%';
  const stage=viewer.open?'photos':deck?'folder':'albums';
