@@ -35,3 +35,4 @@
 #person:has(.is-playing){background:none}
 html.catalog-locked,html.catalog-locked body{overflow:hidden;overscroll-behavior:none}
 html.catalog-locked #scroll{height:100svh}
+#person.animated-fallback{background-image:url("assets/hero-fallback.webp")}

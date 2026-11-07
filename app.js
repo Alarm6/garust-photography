@@ -1,6 +1,21 @@
-const person=document.querySelector('#person'),video=document.querySelector('#modelVideo'),playButton=document.querySelector('#playVideo'),menu=document.querySelector('#menu'),logo=document.querySelector('#logo');
+const person=document.querySelector('#person'),video=document.querySelector('#modelVideo'),menu=document.querySelector('#menu'),logo=document.querySelector('#logo');
 const clamp=x=>Math.max(0,Math.min(1,x)),mix=(a,b,t)=>a+(b-a)*t,smooth=x=>{x=clamp(x);return x*x*(3-2*x)};let pending=false,visible=true;video.muted=true;video.defaultMuted=true;
-function play(){if(visible)video.play().catch(()=>{playButton.hidden=Boolean(video.error)||!visible})}video.addEventListener('canplay',play);video.addEventListener('pause',()=>{if(visible)playButton.hidden=false});video.addEventListener('playing',()=>{playButton.hidden=true;video.classList.add('is-playing')});video.addEventListener('error',()=>{video.classList.remove('is-playing');playButton.hidden=true});playButton.onclick=play;addEventListener('pointerdown',()=>{if(video.paused)play()},{once:true});addEventListener('keydown',()=>{if(video.paused)play()},{once:true});
+function showFallback(){
+  if(!visible)return;
+  video.classList.remove('is-playing');
+  person.classList.add('animated-fallback');
+}
+function play(){
+  if(visible)video.play().catch(showFallback);
+}
+video.addEventListener('canplay',play);
+video.addEventListener('pause',showFallback);
+video.addEventListener('error',showFallback);
+video.addEventListener('playing',()=>{
+  person.classList.remove('animated-fallback');
+  video.classList.add('is-playing');
+});
+addEventListener('pointerdown',()=>{if(video.paused)play()},{once:true});
 const catalogReady=8.9;
 const introKey='garust-intro-complete';
 let catalogLocked=false;
@@ -49,7 +64,8 @@ function update(){if(!pending){pending=true;requestAnimationFrame(draw)}}
 addEventListener('scroll',update,{passive:true});
 addEventListener('resize',update);
 history.scrollRestoration='manual';
-const reloaded=performance.getEntriesByType('navigation')[0]?.type==='reload';
+const navigationType=performance.getEntriesByType('navigation')[0]?.type;
+const reloaded=navigationType?navigationType==='reload':performance.navigation?.type===1;
 if(reloaded){
   try{sessionStorage.removeItem(introKey)}catch{}
   history.replaceState(null,'',location.pathname+location.search);
@@ -63,11 +79,26 @@ function showCatalog(){
   lockCatalog();
   draw();
 }
-logo.addEventListener('click',event=>event.preventDefault());
+logo.addEventListener('click',event=>{
+  event.preventDefault();
+  history.replaceState(null,'',location.pathname+location.search);
+  location.reload();
+});
 document.querySelector('#homeAlbums').addEventListener('click',event=>{
   event.preventDefault();
   history.replaceState(null,'','#albums');
-  showCatalog();
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){showCatalog();return}
+  const start=performance.now(),from=scrollY;
+  function advance(now){
+    if(catalogLocked)return;
+    const t=clamp((now-start)/950);
+    const target=(document.documentElement.scrollHeight-innerHeight)*catalogReady/13;
+    scrollTo({top:mix(from,target,smooth(t)),behavior:'instant'});
+    draw();
+    if(t<1&&!catalogLocked)requestAnimationFrame(advance);
+    else showCatalog();
+  }
+  requestAnimationFrame(advance);
 });
 addEventListener('hashchange',()=>{if(location.hash==='#albums')showCatalog()});
 draw();
