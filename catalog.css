@@ -147,3 +147,4 @@ html::-webkit-scrollbar,.album-filter::-webkit-scrollbar,.viewer-thumbs::-webkit
 }
 #albumScene .album-card .card-surface{box-shadow:0 0 0 1px #0000000a,0 1px 5px #00000018}
 #viewerImage,.viewer-stage .neighbor img,.viewer-thumbs img{filter:drop-shadow(0 1px 3px #0000001c)}
+#albumViewer:focus{outline:none}

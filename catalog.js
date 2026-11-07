@@ -174,7 +174,9 @@ async function open(){
  if(opening||entering||viewer.open||mode!=='photos')return;
  showPhoto(photo);
  document.body.style.overflow='hidden';
- viewer.showModal();render(progress);
+ viewer.showModal();
+ viewer.focus({preventScroll:true});
+ render(progress);
  if(!reducedMotion()){
    opening=true;
    try{
