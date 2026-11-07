@@ -5,8 +5,12 @@ function showFallback(){
   video.classList.remove('is-playing');
   person.classList.add('animated-fallback');
 }
+const useAnimatedIntro=matchMedia('(max-width:650px), (hover:none) and (pointer:coarse)').matches;
 function play(){
-  if(visible)video.play().catch(showFallback);
+  if(!visible)return;
+  if(useAnimatedIntro){showFallback();return}
+  if(!video.hasAttribute('src'))video.src=video.dataset.src;
+  video.play().catch(showFallback);
 }
 video.addEventListener('canplay',play);
 video.addEventListener('pause',showFallback);
