@@ -6,7 +6,6 @@ const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)),lerp=(a,b,t)=>a+(b-a)*t,ease=
 let liftedSheet=null;
 let entries=[],lastFrame="",thumbAlbum=-1;
 const filter=document.querySelector('#albumFilter');
-function jump(p){scrollTo({top:(8.9+4.1*p)/13*(document.documentElement.scrollHeight-innerHeight),behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'instant':'smooth'})}
 function label(i){const album=albums[i];caption.textContent=mode==='photos'?`${photo+1} / ${album.photos.length}`:album.title;category.textContent=mode==='photos'?album.title:album.type+' · '+(indices().indexOf(i)+1)+' / '+indices().length}
 function build(){liftedSheet=null;lastFrame="";root.replaceChildren();cards.length=0;entries=mode==='albums'?indices().map(i=>({album:i,image:albums[i].cover||albums[i].photos[0]})):albums[selected].photos.map((image,i)=>({album:selected,image,photo:i}));
  entries.forEach((entry,i)=>{const button=document.createElement('button');button.className=mode==='photos'?'album-card photo-sheet':'album-card';button.setAttribute('aria-label',mode==='albums'?'Открыть альбом «'+albums[entry.album].title+'»':'Открыть фотографию '+(i+1)+' из альбома «'+albums[selected].title+'»');button.innerHTML='<span class="card-surface"><img data-src="'+asset(entry.image)+'" loading="lazy" alt="" draggable="false"><span class="card-edge"></span></span>';button.addEventListener('click',()=>{if(drag?.moved||opening||entering)return;if(mode==='albums')enterAlbum(entry.album,button);else{photo=entry.photo;label(selected);open(button,entry.image)}});button.addEventListener('pointerenter',()=>{if(!drag&&!opening&&!entering&&mode==='albums')label(entry.album)});button.addEventListener('pointerenter',event=>{if(event.pointerType==='mouse'&&mode==='photos'&&!entering&&!drag)liftSheet(button)});
@@ -86,7 +85,7 @@ async function changeCatalog(direction,change,reveal){
 }
 function backToAlbums(){
  if(entering||opening)return;
- if(mode==='albums'){jump(0);return}
+ if(mode==='albums')return;
  return changeCatalog(-1,()=>{mode='albums';rotation=0;photo=0});
 }
 async function closePhoto(){
